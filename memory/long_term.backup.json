@@ -1,0 +1,91 @@
+{
+  "identity": {
+    "location": {
+      "value": "India",
+      "updated": "2026-11-05"
+    },
+    "language": {
+      "value": "Hindi",
+      "updated": "2026-11-05"
+    },
+    "gender": {
+      "value": "female",
+      "updated": "2026-11-06"
+    },
+    "name": {
+      "value": "Riya",
+      "updated": "2026-11-06"
+    }
+  },
+  "preferences": {
+    "news_preference": {
+      "value": "only India news",
+      "updated": "2026-11-05"
+    },
+    "party_budget": {
+      "value": "1000 rupees",
+      "updated": "2026-11-05"
+    },
+    "born_in": {
+      "value": "1990s",
+      "updated": "2026-11-05"
+    },
+    "favorite_music_era": {
+      "value": "1990s Hindi movies",
+      "updated": "2026-11-05"
+    },
+    "learning_goal": {
+      "value": "wants to practice English",
+      "updated": "2026-11-05"
+    },
+    "favorite_song": {
+      "value": "Ek Ajnabi Sa",
+      "updated": "2026-11-05"
+    }
+  },
+  "projects": {},
+  "relationships": {},
+  "wishes": {
+    "party_plan": {
+      "value": "planning a party with friends at home",
+      "updated": "2026-11-05"
+    }
+  },
+  "notes": {
+    "salary": {
+      "value": "51000",
+      "updated": "2026-11-05"
+    },
+    "jarvis_nickname": {
+      "value": "Max",
+      "updated": "2026-11-05"
+    },
+    "voice_change_observation": {
+      "value": "user noticed voice difference",
+      "updated": "2026-11-05"
+    }
+  },
+  "preference": {
+    "news_region": {
+      "value": "India",
+      "updated": "2026-11-05"
+    }
+  },
+  "sessions": [
+    {
+      "date": "2026-11-05",
+      "summary": "उपयोगकर्ता ने JARVIS से कई बार YouTube पर गाने चलाने, बदलने और पीछे करने के लिए कहा, साथ ही लिंकन मनरो के बारे में जानकारी मांगी। उन्होंने JARVIS की सुनने और टाइप करने की त्रुटियों को भी सुधारा।",
+      "language": "Hindi"
+    },
+    {
+      "date": "2026-11-06",
+      "summary": "उपयोगकर्ता ने अपनी पार्टी की योजना और सुबह के कार्यों के बारे में बात की। उन्होंने 90 के दशक के गानों की एक ट्रैकलिस्ट बनाने पर भी चर्चा की।",
+      "language": "Hindi"
+    },
+    {
+      "date": "2026-11-06",
+      "summary": "उपयोगकर्ता ने शुरुआत में JARVIS का हाल-चाल पूछा और पुष्टि की कि सब कुछ ठीक है। इस बातचीत के दौरान कोई विशेष कार्य पूरा नहीं किया गया।",
+      "language": "Hindi"
+    }
+  ]
+}

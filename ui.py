@@ -419,7 +419,12 @@ class HudCanvas(QWidget):
         self._avatar = None
         if HoloAvatar is not None:
             try:
-                self._avatar = HoloAvatar()
+                try:
+                    from core.avatar_styles import SwitchingAvatar
+                    self._avatar = SwitchingAvatar(HoloAvatar)
+                except Exception as _e:
+                    print(f"[Avatar] naya avatar nahi chala, purana sir: {_e}")
+                    self._avatar = HoloAvatar()
             except Exception:
                 self._avatar = None
 
@@ -1722,12 +1727,12 @@ class CustomizeOverlay(QWidget):
         # ── Assistant voice — Gemini prebuilt voices ─────────────────────────
         # Names are language-neutral proper nouns, so the row reads the same in
         # every locale. Selecting one and applying rebuilds the Live session.
-        from memory.config_manager import AVAILABLE_VOICES, DEFAULT_VOICE
+        from memory.config_manager import AVAILABLE_VOICES, DEFAULT_VOICE, EXTRA_VOICES
         lay.addSpacing(4)
         lay.addWidget(_lbl("ASSISTANT VOICE", 8, color=C.TEXT_DIM,
                             align=Qt.AlignmentFlag.AlignLeft))
         self._sel_voice   = (voice or DEFAULT_VOICE)
-        if self._sel_voice not in AVAILABLE_VOICES:
+        if self._sel_voice not in AVAILABLE_VOICES + EXTRA_VOICES:
             self._sel_voice = DEFAULT_VOICE
         self._voice_btns: dict[str, QPushButton] = {}
         voice_row = QHBoxLayout(); voice_row.setSpacing(4)
@@ -4891,6 +4896,12 @@ class MainWindow(QMainWindow):
         muted, and pressing the mute key during a video hands the decision back
         to them for good.
         """
+        try:
+            from memory.config_manager import load_api_keys as _lak
+            if _lak().get("headphones_mode"):
+                return
+        except Exception:
+            pass
         sound_on = bool(self._video_on and self._video_sound_out
                         and not self._video_sound_out.isMuted())
         if sound_on and not self._muted:
@@ -7107,6 +7118,12 @@ class MainWindow(QMainWindow):
     # ────────────────────────────────────────────────────────────────────────────
 
     def _do_interrupt(self):
+        # Esc / INTERRUPT: chalta hua video ya gaana bhi turant band
+        try:
+            if self.video_is_playing():
+                self.stop_video()
+        except Exception:
+            pass
         if self.on_interrupt:
             self.on_interrupt()
 

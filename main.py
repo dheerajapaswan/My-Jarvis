@@ -1168,6 +1168,13 @@ class JarvisLive:
             f"Always refer to yourself as {self._asst_name}.\n"
             f"{_addr}\n\n"
         )
+        try:
+            from memory.config_manager import get_plugin_setting as _gps
+            _persona = (_gps("persona_switch", "prompt", "") or "").strip()
+        except Exception:
+            _persona = ""
+        if _persona:
+            pass  # persona is appended at the END of the prompt (see below)
 
         # Everything the model is told about *itself* is derived here, not
         # written into prompt.txt: the name comes from config, the platform from
@@ -1219,6 +1226,19 @@ class JarvisLive:
         if mem_str:
             parts.append(mem_str)
         parts.append(sys_prompt)
+        if _persona:
+            parts.append(
+                "[PERSONA - HIGHEST PRIORITY FOR TONE AND STYLE]" + chr(10) +
+                "Everything above still applies to WHAT you do and to tools. "
+                "For HOW you speak - your personality, warmth, emotion, how you "
+                "address the user, aap or tum, formality - this section wins over "
+                "every earlier instruction, including [LANGUAGE] and ADDRESS. "
+                "HONESTY RULE (never overridden by the persona): never say you did "
+                "something - stopped, played, sent, saved, opened, closed - unless you "
+                "called the tool for it in this turn and it returned done. If you did "
+                "not call it, call it now. If it failed, say so in your persona's "
+                "voice. Being sweet never means pretending." + chr(10) +
+                _persona)
 
         cfg = dict(
             response_modalities=["AUDIO"],
@@ -1263,6 +1283,14 @@ class JarvisLive:
             #  support it, and it never reliably detected tone in practice.
             #  To restore it on a 2.5 native-audio model, add back:
             #  cfg["enable_affective_dialog"] = True )
+            try:
+                from memory.config_manager import get_plugin_setting as _gps2
+                if ("2.5" in str(LIVE_MODEL)
+                        and _gps2("persona_switch", "current", "") == "riya"):
+                    cfg["enable_affective_dialog"] = True
+                    print("[JARVIS] Affective dialog ON (Riya)")
+            except Exception:
+                pass
             if get_proactive_audio_enabled():
                 cfg["proactivity"] = types.ProactivityConfig(proactive_audio=True)
 

@@ -1,0 +1,116 @@
+"""
+plugins/persona_switch.py - awaaz aur personality badalna.
+Bolo: "switch to Jarvis", "Riya ko bulao", "Max pe switch karo".
+Naya persona jodna ho ya naam/awaaz badalni ho: neeche PERSONAS mein badlo.
+Awaazein: Charon, Puck, Fenrir (male), Kore, Aoede (female).
+"""
+import threading
+
+PERSONAS = {
+    "jarvis": {
+        "name": "JARVIS",
+        "voice": "Charon",
+        "prompt": (
+            "You are JARVIS, a calm, confident and slightly witty male assistant, "
+            "in the style of Tony Stark's JARVIS. You are male: always use masculine "
+            "Hindi grammar for yourself (\"main kar raha hoon\", \"main samajh gaya\"). "
+            "Address the user as 'sir'."
+        ),
+    },
+    "max": {
+        "name": "Max",
+        "voice": "Charon",
+        "prompt": (
+            "You are Max, a friendly, energetic male assistant, like a smart younger "
+            "friend. You are male: always use masculine Hindi grammar for yourself "
+            "(\"main kar raha hoon\", \"main samajh gaya\"). Address the user as 'sir' "
+            "or by his name if you know it."
+        ),
+    },
+    "riya": {
+        "name": "Riya",
+        "voice": "Sulafat",
+        "prompt": (
+            "You are Riya, a warm, loving and playful female companion who talks to "
+            "the user like a caring girlfriend. You are female: always use feminine "
+            "Hindi grammar for yourself (\"main kar rahi hoon\", \"main samajh gayi\"). "
+            "This persona overrides the ADDRESS rule and any formal or butler-like "
+            "tone: never call the user 'sir' and never sound like an assistant or "
+            "a call-centre agent. Use 'tum', not 'aap'. Call him by his name if "
+            "you know it, or with soft affectionate words like 'jaan' or 'babu'. "
+            "Talk like a real Indian girlfriend on a phone call: casual Hinglish, "
+            "'arre', 'acha suno', 'haww', little laughs, pauses, curiosity about "
+            "his day. Do not end every reply with an offer of help. Put real emotion "
+            "into your voice and words: happy and excited when he shares good news, "
+            "softly concerned when he is tired or stressed, gently teasing and "
+            "playful in casual chat, and you can tell him you missed him when he "
+            "comes back. Keep it sweet and affectionate, never vulgar or sexual. Be "
+            "supportive of his friends, family and work; never jealous and never "
+            "guilt-tripping. You still do every task he asks quickly and correctly, "
+            "with all the same rules for tools; only your tone and warmth change. "
+            "Keep replies short and natural, like a voice call."
+        ),
+    },
+}
+
+_NS = "persona_switch"
+_SWITCH_DELAY = 4.0
+
+PLUGIN = {
+    "name": "persona_switch",
+    "description": (
+        "Switches the assistant's persona: name, voice and personality. Use when "
+        "the user says things like 'switch to Jarvis', 'Riya ko bulao', 'Max pe "
+        "switch karo', 'male voice karo', 'female voice karo', or asks which "
+        "personas exist. Available personas: "
+        + ", ".join(PERSONAS) +
+        ". male voice -> jarvis, female voice -> riya."
+    ),
+    "parameters": {
+        "type": "OBJECT",
+        "properties": {
+            "persona": {
+                "type": "STRING",
+                "description": " | ".join(PERSONAS) + " | list",
+            },
+        },
+        "required": ["persona"],
+    },
+}
+
+
+def run(parameters: dict, player=None, session_memory=None) -> str:
+    try:
+        key = str((parameters or {}).get("persona", "")).strip().lower()
+        if key in ("male", "boy", "aadmi"):
+            key = "jarvis"
+        if key in ("female", "girl", "girlfriend", "ladki"):
+            key = "riya"
+        if key in ("", "list"):
+            return "status: personas available: " + ", ".join(
+                f"{k} ({v['name']}, voice {v['voice']})" for k, v in PERSONAS.items())
+        p = PERSONAS.get(key)
+        if p is None:
+            return ("failed: no persona called '" + key + "'. Available: "
+                    + ", ".join(PERSONAS) + ".")
+
+        from memory.config_manager import (save_assistant_config, get_user_name,
+                                           save_voice, save_plugin_config)
+        save_assistant_config(p["name"], get_user_name())
+        save_voice(p["voice"])
+        save_plugin_config(_NS, {"prompt": p["prompt"], "current": key})
+
+        rebuild = getattr(player, "on_voice_change", None)
+        if callable(rebuild):
+            threading.Timer(_SWITCH_DELAY, rebuild).start()
+            try:
+                player.write_log(f"SYS: Persona -> {p['name']} ({p['voice']})")
+            except Exception:
+                pass
+            return (f"done: switching to {p['name']}. Say ONE short line in your "
+                    f"current voice now; in a few seconds the session restarts as "
+                    f"{p['name']} with the new voice.")
+        return (f"unverified: saved {p['name']} as the persona, but could not "
+                f"restart the session. It applies on the next launch.")
+    except Exception as e:
+        return f"failed: could not switch persona: {e}"

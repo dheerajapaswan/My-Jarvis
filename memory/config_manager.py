@@ -80,13 +80,14 @@ def save_assistant_config(assistant_name: str, user_name: str) -> None:
 # language, so this list is safe to show verbatim in any locale.
 AVAILABLE_VOICES = ["Charon", "Puck", "Kore", "Fenrir", "Aoede"]
 DEFAULT_VOICE    = "Charon"
+EXTRA_VOICES     = ["Sulafat", "Leda", "Despina", "Achernar", "Vindemiatrix", "Zephyr", "Callirrhoe", "Autonoe", "Erinome", "Laomedeia", "Gacrux", "Pulcherrima"]
 
 
 def get_voice() -> str:
     """Return the configured Live voice, falling back to the default if unset
     or if the stored value is not a voice we recognise."""
     v = load_api_keys().get("voice_name", DEFAULT_VOICE) or DEFAULT_VOICE
-    return v if v in AVAILABLE_VOICES else DEFAULT_VOICE
+    return v if (v in AVAILABLE_VOICES or v in EXTRA_VOICES) else DEFAULT_VOICE
 
 
 def save_voice(voice_name: str) -> None:
@@ -100,7 +101,7 @@ def save_voice(voice_name: str) -> None:
         except Exception:
             data = {}
     v = (voice_name or "").strip()
-    data["voice_name"] = v if v in AVAILABLE_VOICES else DEFAULT_VOICE
+    data["voice_name"] = v if (v in AVAILABLE_VOICES or v in EXTRA_VOICES) else DEFAULT_VOICE
     CONFIG_FILE.write_text(json.dumps(data, indent=4), encoding="utf-8")
 
 

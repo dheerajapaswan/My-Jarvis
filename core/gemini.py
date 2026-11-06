@@ -187,8 +187,8 @@ _LADDERS = {
 # survivable — the connect loop drops the tuning and proactive-audio fields and
 # reconnects when the server rejects them.
 LIVE_MODELS = (
-    "models/gemini-3.1-flash-live-preview",
     "models/gemini-2.5-flash-native-audio-preview-12-2025",
+    "models/gemini-3.1-flash-live-preview",
 )
 
 # The Live model to use for one-shot calls. main.py owns the real one; this is

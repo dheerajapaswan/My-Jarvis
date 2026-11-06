@@ -177,6 +177,7 @@ def video_player(parameters: dict = None, response=None, player=None,
     params = parameters or {}
     action = (params.get("action") or "play").strip().lower()
     source = (params.get("source") or "").strip()
+    _sound = str(params.get("sound", "")).strip().lower() in ("true", "1", "yes", "on")
 
     if player is None:
         return "There is no display to play a video on."
@@ -206,13 +207,13 @@ def video_player(parameters: dict = None, response=None, player=None,
 
     local = _local_path(source)
     if local:
-        player.show_video(local, Path(local).name, muted=True)
-        return f"Playing {Path(local).name} on the display, muted."
+        player.show_video(local, Path(local).name, muted=not _sound)
+        return f"Playing {Path(local).name} on the display" + ("" if _sound else ", muted") + "."
 
     # A direct media URL can go straight to the player; a YouTube page cannot.
     if _is_url(source) and not _YT.search(source):
-        player.show_video(source, source.rsplit("/", 1)[-1][:44], muted=True)
-        return "Playing that on the display, muted."
+        player.show_video(source, source.rsplit("/", 1)[-1][:44], muted=not _sound)
+        return "Playing that on the display" + ("" if _sound else ", muted") + "."
 
     # ANSWER FIRST, OPEN SECOND.
     #
@@ -225,14 +226,14 @@ def video_player(parameters: dict = None, response=None, player=None,
     # So the seconds stay, and what changes is where the user spends them:
     # listening to JARVIS say it is coming, instead of watching nothing happen.
     # The same shape whatsapp_call uses, and for the same reason.
-    threading.Thread(target=_play_youtube, args=(player, source, _begin_open()),
+    threading.Thread(target=_play_youtube, args=(player, source, _begin_open(), _sound),
                      daemon=True, name="video-open").start()
     # Deliberately a status line rather than a finished English sentence: the
     # model writes the words, in the user's own language.
     return f"status=opening source={source}"
 
 
-def _play_youtube(player, source: str, token: int) -> None:
+def _play_youtube(player, source: str, token: int, sound: bool = False) -> None:
     """The part that takes seconds. Speaks only if something goes wrong —
     silence means the video is on screen, which the user can see for
     themselves."""
@@ -247,7 +248,7 @@ def _play_youtube(player, source: str, token: int) -> None:
 
     if url:
         try:
-            player.show_video(url, title or source, muted=True,
+            player.show_video(url, title or source, muted=not sound,
                               audio_source=audio_url)
             return
         except Exception as e:                              # noqa: BLE001
@@ -289,8 +290,9 @@ TOOL = {
         "video on the screen', 'stop the video', 'videoyu kapat', 'turn the "
         "sound on', 'sesi aç', 'mute it'. Accepts a local file path, a direct "
         "video URL, a YouTube link, or a description to search YouTube for. "
-        "Video always starts MUTED — only call action='unmute' when the user "
-        "actually asks to hear it. "
+        "For a SONG or music (gaana, song, music, bhajan) set sound='true' so it "
+        "starts with sound. Other videos start muted - call action='unmute' only "
+        "when the user asks to hear it. "
         "This returns the moment it is asked, before the picture appears: when "
         "it answers 'status=opening', say in one short sentence that you are "
         "putting it on the display, and do not wait or call it again. "
@@ -311,6 +313,10 @@ TOOL = {
                 "description": ("'play' (default), 'stop' to close it, 'unmute' "
                                 "to turn the sound on, 'mute' to silence it."),
                 "enum": ["play", "stop", "mute", "unmute"],
+            },
+            "sound": {
+                "type": "STRING",
+                "description": "'true' to start with sound (songs, music). Default muted.",
             },
             "source": {
                 "type": "STRING",
