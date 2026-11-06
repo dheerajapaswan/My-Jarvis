@@ -494,10 +494,15 @@ def _handle_pause(parameters: dict, player=None, speak=None) -> str:
     return _yt_key("k", False, "play/pause")
 
 
+def _handle_fullscreen(parameters: dict, player=None, speak=None) -> str:
+    return _yt_key("f", False, "fullscreen on/off")
+
+
 _ACTION_MAP = {
     "play":      _handle_play,
     "next":      _handle_next,
     "pause":     _handle_pause,
+    "fullscreen": _handle_fullscreen,
     "summarize": _handle_summarize,
     "get_info":  _handle_get_info,
     "trending":  _handle_trending,
@@ -537,13 +542,13 @@ def youtube_video(
 # ── Tool declaration (auto-discovered by core/action_loader.py) ──────────────
 TOOL = {
     "name": "youtube_video",
-    "description": "Controls YouTube in the user's Chrome. Use for: playing videos, summarizing a video's content, getting video info, or showing trending videos. For next song / skip / agla gaana use action=next and NEVER play a new search for it. For pause or resume use action=pause. play reuses the YouTube tab that is already open instead of opening a new window.",
+    "description": "Controls YouTube in the user's Chrome. Use for: playing videos, summarizing a video's content, getting video info, or showing trending videos. For next song / skip / agla gaana use action=next and NEVER play a new search for it. For pause or resume use action=pause. For full screen / fullscreen karo / chhota karo use action=fullscreen (it toggles). play reuses the YouTube tab that is already open instead of opening a new window.",
     "parameters": {
         "type": "OBJECT",
         "properties": {
             "action": {
                 "type": "STRING",
-                "description": "play | next | pause | summarize | get_info | trending (default: play)"
+                "description": "play | next | pause | fullscreen | summarize | get_info | trending (default: play)"
             },
             "query": {
                 "type": "STRING",
